@@ -367,15 +367,26 @@ function buildPadChart(){
   const labels=sorted.map(e=>e[0]);
   const brandCts=sorted.map(e=>e[1].size);
   const prodCts=sorted.map(e=>countsByPad[e[0]]||0);
-  const bgColors=labels.map(p=>PAD_COLORS[p]||'#888');
+  // cor da barra = familia de cor presente em mais marcas dentro do padrao
+  const famDom={};
+  labels.forEach(p=>{
+    const fb={};
+    dd.filter(d=>d.p===p&&d.fc&&d.fc!=='Sem cor').forEach(d=>{
+      if(!fb[d.fc])fb[d.fc]={marcas:new Set(),n:0};
+      fb[d.fc].marcas.add(d.m);fb[d.fc].n++;
+    });
+    const top=Object.entries(fb).sort((a,b)=>b[1].marcas.size-a[1].marcas.size||b[1].n-a[1].n)[0];
+    famDom[p]=top?{fam:top[0],marcas:top[1].marcas.size}:null;
+  });
+  const bgColors=labels.map(p=>famDom[p]?(FAM_COLORS[famDom[p].fam]||'#888'):'#b4b2a9');
   const ctx=document.getElementById('padChart').getContext('2d');
   if(padChartInst)padChartInst.destroy();
   padChartInst=new Chart(ctx,{
     type:'bar',
-    data:{labels,datasets:[{data:brandCts,backgroundColor:bgColors,borderRadius:4,borderSkipped:false}]},
+    data:{labels,datasets:[{data:brandCts,backgroundColor:bgColors,borderColor:'rgba(0,0,0,.18)',borderWidth:1,borderRadius:4,borderSkipped:false}]},
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>[' '+brandCts[c.dataIndex]+' marcas',' '+prodCts[c.dataIndex]+' conjuntos']}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const fd=famDom[labels[c.dataIndex]];const l=[' '+brandCts[c.dataIndex]+' marcas',' '+prodCts[c.dataIndex]+' conjuntos'];if(fd)l.push(' cor dominante: '+fd.fam+' ('+fd.marcas+' marcas)');return l;}}}},
       scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,.06)'},title:{display:true,text:'nº de marcas',font:{size:11}}}},
       onClick:(e,els)=>{
         if(!els.length)return;
