@@ -497,6 +497,7 @@ function buildCorteCharts(){
       if(!ctype)return;
       const vals=new Set();
       fields.forEach(f=>(d[f]||'').split(',').forEach(v=>{v=normCorte(v);if(v)vals.add(v);}));
+      if(d.mt&&d.mt.includes('Franzido / Drapeado'))vals.add('Franzido / Drapeado');
       vals.forEach(v=>{
         if(!map[v])map[v]={marcas:new Set(),total:0,porTipo:{'Liso':0,'Duas cores':0,'Com padrão':0}};
         map[v].marcas.add(d.m);map[v].total++;map[v].porTipo[ctype]++;
@@ -555,8 +556,9 @@ function buildCorteCharts(){
   const tops=dd.filter(d=>d.t!=='Fato de Banho');
   const fatos=dd.filter(d=>d.t==='Fato de Banho');
 
-  const hasCorte=(field)=>(d,corte)=>(d[field]||'').split(',').map(v=>normCorte(v)).includes(corte);
-  const hasCorteAny=(d,corte)=>['ct','cc'].some(f=>(d[f]||'').split(',').map(v=>normCorte(v)).includes(corte));
+  const isFranzido=d=>d.mt&&d.mt.includes('Franzido / Drapeado');
+  const hasCorte=(field)=>(d,corte)=>corte==='Franzido / Drapeado'?isFranzido(d):(d[field]||'').split(',').map(v=>normCorte(v)).includes(corte);
+  const hasCorteAny=(d,corte)=>corte==='Franzido / Drapeado'?isFranzido(d):['ct','cc'].some(f=>(d[f]||'').split(',').map(v=>normCorte(v)).includes(corte));
 
   buildStacked('corteTopChart','corteTopWrap',corteStats(tops,['ct']),'top',
     (d,c)=>d.t!=='Fato de Banho'&&hasCorte('ct')(d,c),'Corte top');
@@ -580,7 +582,7 @@ function buildEsgotados(){
 let matChartInst;
 function buildMateriais(){
   const dd=dedup(filtered);
-  const comMat=dd.filter(d=>d.mt&&d.mt.length);
+  const comMat=dd.filter(d=>d.mt&&d.mt.some(x=>x!=='Franzido / Drapeado'));
   const marcasComDados=new Set(comMat.map(d=>d.m));
   const todasMarcas=new Set(dd.map(d=>d.m));
   const semDados=[...todasMarcas].filter(m=>!marcasComDados.has(m));
@@ -592,7 +594,7 @@ function buildMateriais(){
 
   const map={};
   comMat.forEach(d=>{
-    d.mt.forEach(mt=>{
+    d.mt.filter(mt=>mt!=='Franzido / Drapeado').forEach(mt=>{
       if(!map[mt])map[mt]={marcas:new Set(),total:0};
       map[mt].marcas.add(d.m);map[mt].total++;
     });
