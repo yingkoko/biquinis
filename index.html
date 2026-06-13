@@ -644,7 +644,7 @@ function buildPadChart(){
         if(!els.length)return;
         const lbl=labels[els[0].index];
         if(lbl==='Acessórios Metálicos'){
-          panelPatFilter['pad']='liso';
+          panelPatFilter['pad']='Liso';
           showProducts('pad',filtered.filter(d=>d.am===1),'Acessórios Metálicos','colorFirst');
         } else if(lbl==='Brilhantes'){
           panelPatFilter['pad']='all';
@@ -951,8 +951,7 @@ function renderPanel(panel){
   if(tf==='fato')   products=products.filter(d=>d.t==='Fato de Banho');
   // Filtro padrão: só aparece para Metálicos/Brilhantes
   const pf=panelPatFilter[panel];
-  if(pf==='liso') products=products.filter(d=>d.p==='Liso'||d.p==='Liso Bicolor');
-  else if(pf==='pad') products=products.filter(d=>d.p!=='Liso'&&d.p!=='Liso Bicolor'&&d.p!=='Sem análise');
+  if(pf&&pf!=='all') products=products.filter(d=>d.p===pf);
 
   const sortMode=state.sortMode;
 
@@ -986,14 +985,16 @@ function renderPanel(panel){
     <button class="tf-btn tf-btn-${panel}${tf==='bikini'?' tf-active':''}" onclick="setTypeFilter('${panel}','bikini',this)">Tops & Biquínis (${totalBikini})</button>
     <button class="tf-btn tf-btn-${panel}${tf==='fato'?' tf-active':''}" onclick="setTypeFilter('${panel}','fato',this)">Fatos de Banho (${totalFato})</button>
   </div>`;
-  // Barra de filtro Liso/Padrão — só aparece quando panelPatFilter está definido
-  const rawLiso=state.raw.filter(d=>d.p==='Liso'||d.p==='Liso Bicolor').length;
-  const rawPad=state.raw.filter(d=>d.p!=='Liso'&&d.p!=='Liso Bicolor'&&d.p!=='Sem análise').length;
-  const patBar=pf!==undefined?`<div style="padding:6px 14px;display:flex;gap:6px;border-bottom:1px solid #f1f0ea;background:#f5f4f0;flex-wrap:wrap;align-items:center"><span style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-right:4px">Padrão</span>
-    <button class="tf-btn pf-btn-${panel}${(!pf||pf==='all')?' tf-active':''}" onclick="setPatFilter('${panel}','all',this)">Todos</button>
-    <button class="tf-btn pf-btn-${panel}${pf==='liso'?' tf-active':''}" onclick="setPatFilter('${panel}','liso',this)">Liso (${rawLiso})</button>
-    <button class="tf-btn pf-btn-${panel}${pf==='pad'?' tf-active':''}" onclick="setPatFilter('${panel}','pad',this)">Com padrão (${rawPad})</button>
-  </div>`:'';
+  // Barra de filtro por padrão — dinâmica, ordena por nº marcas
+  let patBar='';
+  if(pf!==undefined){
+    const pc={};
+    state.raw.forEach(d=>{if(d.p&&d.p!=='Sem análise'){if(!pc[d.p]){pc[d.p]={b:new Set(),n:0};}pc[d.p].b.add(d.m);pc[d.p].n++;}});
+    const ps=Object.entries(pc).sort((a,b)=>b[1].b.size-a[1].b.size);
+    let pbts=`<button class="tf-btn pf-btn-${panel}${(!pf||pf==='all')?' tf-active':''}" onclick="setPatFilter('${panel}','all',this)">Todos</button>`;
+    ps.forEach(([p,v])=>{pbts+=`<button class="tf-btn pf-btn-${panel}${pf===p?' tf-active':''}" data-pf="${p}" onclick="setPatFilter('${panel}',this.dataset.pf,this)">${p.split('/')[0].trim()} <span style="font-size:10px;opacity:.55">${v.b.size}</span></button>`;});
+    patBar=`<div style="padding:6px 14px;display:flex;gap:5px;border-bottom:1px solid #f1f0ea;background:#f5f4f0;flex-wrap:wrap;align-items:center"><span style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-right:4px">Padrão</span>${pbts}</div>`;
+  }
 
   if(sortMode==='colorFirst'){
     const famMap={};
