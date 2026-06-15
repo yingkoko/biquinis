@@ -79,6 +79,33 @@ a{color:#2a6db5;text-decoration:none}a:hover{text-decoration:underline}
 .tf-btn{font-size:12px;padding:4px 12px;border:0.5px solid #e0dfd8;border-radius:20px;background:#fff;cursor:pointer;color:#555}
 .tf-btn:hover{background:#f1f0ea}
 .tf-active{background:#1a1a18;color:#fff;border-color:#1a1a18;font-weight:500}
+
+/* ── RESPONSIVO MOBILE ─────────────────────────────────────────────────── */
+.mob-menu-btn{display:none;padding:5px 12px;border:1px solid #e0dfd8;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;color:#444;margin-left:auto;flex-shrink:0}
+@media(max-width:768px){
+  .mob-menu-btn{display:block}
+  .layout{grid-template-columns:1fr;height:auto;min-height:calc(100vh - 53px)}
+  .sidebar{display:none;position:fixed;top:53px;left:0;right:0;z-index:200;background:#fff;border-right:none;border-bottom:1px solid #e0dfd8;max-height:55vh;overflow-y:auto;box-shadow:0 6px 24px rgba(0,0,0,.15);padding:12px 14px}
+  .sidebar.mob-open{display:block}
+  .main{padding:10px;overflow-y:visible;height:auto}
+  header{padding:10px 14px}
+  header h1{font-size:14px}
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{white-space:nowrap;flex-shrink:0;font-size:12px;padding:5px 10px}
+  .cards{grid-template-columns:repeat(2,1fr);gap:8px}
+  .card{padding:10px 12px}
+  .card .val{font-size:17px}
+  .grid2{grid-template-columns:1fr}
+  .product-panel table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  .hm-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .color-grid{grid-template-columns:repeat(auto-fill,minmax(68px,1fr))}
+  .chart-box{padding:12px}
+  .pp-header{padding:9px 12px}
+  td,th{padding:6px 9px}
+  .tf-btn{font-size:11px;padding:4px 9px}
+  .chart-wrap{min-height:180px}
+}
 </style>
 </head>
 <body>
@@ -86,6 +113,7 @@ a{color:#2a6db5;text-decoration:none}a:hover{text-decoration:underline}
   <h1>Swimwear Intelligence</h1>
   <span class="badge" id="totalBadge">— peças</span>
   <span class="badge dark" id="filterBadge" style="display:none"></span>
+  <button class="mob-menu-btn" onclick="toggleSidebar()">☰ Filtros</button>
 </header>
 <div class="layout">
 <nav class="sidebar">
@@ -1145,6 +1173,11 @@ function switchTab(name,btn){
 }
 
 applyFilters();
+
+function toggleSidebar(){
+  const s=document.querySelector('.sidebar');
+  s.classList.toggle('mob-open');
+}
 </script>
 </body>
 </html>
